@@ -1,4 +1,4 @@
-//import 'package:login_with_signup/Model/UserModel.dart';
+import 'package:fluttertest/userdata/userfile.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -41,36 +41,32 @@ class databaseconnect {
         ")");
   }
 
-  Future<int> saveData(UserModel user) async {
+  Future<userfile> saveData(userfile user) async {
     var dbClient = await db;
-    var res = await dbClient.insert(Table_Userinfo, user.toMap());
-    return res;
+    user.user_name = (await dbClient.insert(Table_Userinfo, user.toMap())) as String;
+    return user;
   }
 
-  Future<UserModel> getLoginUser(String userId, String password) async {
-    var dbClient = await db;
-    var res = await dbClient.rawQuery("SELECT * FROM $Table_User WHERE "
-        "$C_UserID = '$userId' AND "
-        "$C_Password = '$password'");
+//  Future<UserModel> getLoginUser(String userId, String password) async {
+  //  var dbClient = await db;
+    //var res = await dbClient.rawQuery("SELECT * FROM $Table_User WHERE "
+      //  "$C_UserID = '$userId' AND "
+        //"$C_Password = '$password'");
 
-    if (res.length > 0) {
-      return UserModel.fromMap(res.first);
-    }
+//    if (res.length > 0) {
+  //    return UserModel.fromMap(res.first);}
 
-    return null;
-  }
+//    return null;}
 
-  Future<int> updateUser(UserModel user) async {
-    var dbClient = await db;
-    var res = await dbClient.update(Table_User, user.toMap(),
-        where: '$C_UserID = ?', whereArgs: [user.user_id]);
-    return res;
-  }
+//  Future<int> updateUser(UserModel user) async {
+  //  var dbClient = await db;
+    //var res = await dbClient.update(Table_User, user.toMap(),
+      //  where: '$C_UserID = ?', whereArgs: [user.user_id]);
+    //return res;}
 
-  Future<int> deleteUser(String user_id) async {
-    var dbClient = await db;
-    var res = await dbClient
-        .delete(Table_User, where: '$C_UserID = ?', whereArgs: [user_id]);
-    return res;
-  }
+//  Future<int> deleteUser(String user_id) async {
+  //  var dbClient = await db;
+    //var res = await dbClient
+      //  .delete(Table_User, where: '$C_UserID = ?', whereArgs: [user_id]);
+    //return res;}
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-//import 'comHelper.dart';
+import 'helptofill.dart';
 
 class text_field extends StatelessWidget {
   TextEditingController controller;
@@ -12,7 +11,7 @@ class text_field extends StatelessWidget {
 
   text_field(
       {this.controller, this.hintName, this.icon,
-        this.isObscureText = false, this.inputType = TextInputType.text,
+        this.isObscureText = false, this.inputType = TextInputType.text, required TextInputType keyboardType, required bool obscureText, required String? Function(dynamic value) validator,
         //this.isEnable = true
       });
 
@@ -27,30 +26,29 @@ class text_field extends StatelessWidget {
         keyboardType: TextInputType.text,
         validator: (value) {
            if (value == null || value.isEmpty) {
-              return 'Please enter $hintName';
+             return 'Please enter $hintName';
            }
-        //           if (hintName == "Email" && !validateEmail(value)) {
-        //             return 'Please Enter Valid Email';
-        //           }
-           return null;
+           if (hintName == "Email" && !validateEmail(value)) {
+             return 'Please Enter Valid Email';
+           }
+             return null;
         },
-        onSaved: (val) => controller.text = val,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(30.0)),
             borderSide: BorderSide(color: Colors.transparent),
           ),
-      focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(30.0)),
-      borderSide: BorderSide(color: Colors.blue),
-      ),
-      prefixIcon: Icon(icon),
-      hintText: hintName,
-      labelText: hintName,
-      fillColor: Colors.grey[200],
-      filled: true
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(30.0)),
+            borderSide: BorderSide(color: Colors.blue),
+          ),
+        prefixIcon: Icon(icon),
+        hintText: hintName,
+        labelText: hintName,
+        fillColor: Colors.grey[200],
+        filled: true
         ),
-     ),
+      ),
     );
   }
 }

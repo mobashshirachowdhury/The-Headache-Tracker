@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:fluttertest/pages/daily_form.dart';
 import 'package:fluttertest/pages/calendar.dart';
 import 'package:fluttertest/pages/main_page.dart';
-import 'login_page.dart';
+import 'package:fluttertest/pages/login_page.dart';
+import 'package:fluttertest/components/helptofill.dart';
+import 'package:fluttertest/components/text_field.dart';
+import 'package:fluttertest/databasehandler/databaseconnect.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -13,7 +16,6 @@ class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
 
   List pages = [
-    LoginForm(),
     DailyForm(),
     HeadacheFormMenu(),
     Calendar()

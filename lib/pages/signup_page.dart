@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:fluttertest/components/helptofill.dart';
 import 'package:fluttertest/components/loginsignupheader.dart';
 import 'package:fluttertest/pages/login_page.dart';
-//import 'package:login_with_signup/Comm/comHelper.dart';
 import 'package:fluttertest/components/text_field.dart';
 import 'package:fluttertest/databasehandler/databaseconnect.dart';
-//import 'package:login_with_signup/Model/UserModel.dart';
+import 'package:fluttertest/userdata/userfile.dart';
+import 'package:toast/toast.dart';
 
 class signup_page extends StatefulWidget {
   @override
@@ -28,7 +28,9 @@ class _signup_pageState extends State<signup_page> {
     databaseconnect = databaseconnect();
   }
 
-  signup() async {
+  signup() {
+    final form = _formKey.currentState;
+
     String uname = _conUserName.text;
     String email = _conEmail.text;
     String passwd = _conPassword.text;
@@ -36,13 +38,11 @@ class _signup_pageState extends State<signup_page> {
     String ugender = _conUserGender.text;
 
     if(form.validate()){
-      alertDialog(context, "OK");
-    }
 
 //    if (_formKey.currentState.validate()) {
-    //     if (passwd != cpasswd) {
-    //     alertDialog(context, 'Password Mismatch');
-    // } else {
+      if (passwd != cpasswd) {
+        alertDialog(context, 'Password Mismatch');
+      } else {
     //  _formKey.currentState.save();
 
     // UserModel uModel = UserModel(uid, uname, email, passwd);
@@ -53,7 +53,10 @@ class _signup_pageState extends State<signup_page> {
     //            context, MaterialPageRoute(builder: (_) => LoginForm()));
     //    }).catchError((error) {
     //    print(error);
-    //  alertDialog(context, "Error: Data Save Fail");});}}}
+    //  alertDialog(context, "Error: Data Save Fail");});
+        }
+    }
+  }
 
     @override
     Widget build(BuildContext context) {
