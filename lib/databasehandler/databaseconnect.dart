@@ -11,6 +11,7 @@ class databaseconnect {
   static const String Table_Userinfo = 'userinfo';
   static const int Version = 1;
 
+  static const String C_UserId = 'user_id';
   static const String C_UserName = 'user_name';
   static const String C_Email = 'email';
   static const String C_Password = 'password';
@@ -33,28 +34,29 @@ class databaseconnect {
 
   _onCreate(Database db, int intVersion) async {
     await db.execute("CREATE TABLE $Table_Userinfo("
+        " $C_UserId TEXT, "
         " $C_UserName TEXT, "
         " $C_Email TEXT,"
         " $C_Password TEXT, "
         " $C_UserGender TEXT, "
-        " PRIMARY KEY ($C_Email)"
+        " PRIMARY KEY ($C_UserId)"
         ")");
   }
 
   Future<userfile> saveData(userfile user) async {
     var dbClient = await db;
-    user.user_name = (await dbClient.insert(Table_Userinfo, user.toMap())) as String;
+    user.user_id = (await dbClient.insert(Table_Userinfo, user.toMap())) as String;
     return user;
   }
 
-//  Future<UserModel> getLoginUser(String userId, String password) async {
-  //  var dbClient = await db;
-    //var res = await dbClient.rawQuery("SELECT * FROM $Table_User WHERE "
-      //  "$C_UserID = '$userId' AND "
-        //"$C_Password = '$password'");
+  Future<userfile> getLoginUser(String userId, String password) async {
+    var dbClient = await db;
+    var res = await dbClient.rawQuery("SELECT * FROM $Table_Userinfo WHERE "
+        "$C_UserId = '$userId' AND " "$C_Password = '$password'");
 
-//    if (res.length > 0) {
-  //    return UserModel.fromMap(res.first);}
+    if (res.length > 0) {
+      return userfile.fromMap(res.first);
+    }
 
 //    return null;}
 
@@ -62,7 +64,8 @@ class databaseconnect {
   //  var dbClient = await db;
     //var res = await dbClient.update(Table_User, user.toMap(),
       //  where: '$C_UserID = ?', whereArgs: [user.user_id]);
-    //return res;}
+    //return res;
+  }
 
 //  Future<int> deleteUser(String user_id) async {
   //  var dbClient = await db;

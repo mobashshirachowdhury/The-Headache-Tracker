@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertest/components/button.dart';
+import 'package:fluttertest/components/helptofill.dart';
 import 'package:fluttertest/components/loginsignupheader.dart';
 import 'package:fluttertest/components/text_field.dart';
-import 'package:fluttertest/components/square_tile.dart';
+import 'package:fluttertest/databasehandler/databaseconnect.dart';
+import 'package:fluttertest/userdata/userfile.dart';
 import 'package:fluttertest/pages/signup_page.dart';
-import '.dart';
-//import 'package:login_with_signup/Comm/genLoginSignupHeader.dart';
-//import 'package:login_with_signup/Comm/genTextFormField.dart';
-//import 'package:login_with_signup/DatabaseHandler/DbHelper.dart';
-//import 'package:login_with_signup/Model/UserModel.dart';
-//import 'package:login_with_signup/Screens/SignupForm.dart';
+import 'package:fluttertest/pages/Home_page.dart';
+
 //import 'package:shared_preferences/shared_preferences.dart';
 
-class login_page extends StatefulWidget {
+class _login_page extends StatefulWidget {
   @override
   _login_pageState createState() => _login_pageState();
 }
@@ -21,41 +18,40 @@ class login_pageState extends State<login_page> {
 //  Future<SharedPreferences> _pref = SharedPreferences.getInstance();
 //  final _formKey = new GlobalKey<FormState>();
 
-//  final _conUserId = TextEditingController();
-  //final _conPassword = TextEditingController();
-  //var dbHelper;
+  final _conUserId = TextEditingController();
+  final _conPassword = TextEditingController();
+  var databaseconnect;
 
- // @override
-  //void initState() {
-    //super.initState();
-    //dbHelper = DbHelper();
-  //}
+  @override
+  void initState() {
+    super.initState();
+    databaseconnect = databaseconnect();
+  }
 
-  //login() async {
- //   String uid = _conUserId.text;
-   // String passwd = _conPassword.text;
+  login() async {
+    String uid = _conUserId.text;
+    String passwd = _conPassword.text;
 
-//    if (uid.isEmpty) {
-  //    alertDialog(context, "Please Enter User ID");
-    //} else if (passwd.isEmpty) {
-      //alertDialog(context, "Please Enter Password");
-//    } else {
-  //    await dbHelper.getLoginUser(uid, passwd).then((userData) {
-    //    if (userData != null) {
-      //    setSP(userData).whenComplete(() {
-        //    Navigator.pushAndRemoveUntil(
-          //      context,
-            //    MaterialPageRoute(builder: (_) => HomeForm()),
-              //      (Route<dynamic> route) => false);
-//          });
-  //      } else {
-    //      alertDialog(context, "Error: User Not Found");
-      //  }
-//      }).catchError((error) {
-  //      print(error);
-    //    alertDialog(context, "Error: Login Fail");
-      //});
-    //}
+    if (uid.isEmpty) {
+      alertDialog(context, "Please Enter User ID");
+    } else if (passwd.isEmpty) {
+      alertDialog(context, "Please Enter Password");
+    } else {
+      await databaseconnect.getLoginUser(uid, passwd).then((userData) {
+        if (userData != null) {
+          //setSP(userData).whenComplete(() {
+            Navigator.pushAndRemoveUntil(
+                context, MaterialPageRoute(builder: (_) => MyHomePage()),
+                    (Route<dynamic> route) => false);
+        //  });
+        } else {
+          alertDialog(context, "Error: User Not Found");
+        }
+      }).catchError((error) {
+            print(error);
+            alertDialog(context, "Error: Login Fail");
+      });
+    }
   }
 
 //  Future setSP(UserModel user) async {
