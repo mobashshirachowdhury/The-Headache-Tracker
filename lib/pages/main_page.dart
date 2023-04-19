@@ -1,7 +1,38 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:fluttertest/pages/symptoms_page.dart';
+import 'package:fluttertest/pages/medicine_page.dart';
 
-class HeadacheFormMenu extends StatelessWidget {
+DateTime now = DateTime.now();
+DateTime todayDate = DateTime(now.year,now.month,now.day);
+TimeOfDay TODNow = TimeOfDay(hour: now.hour, minute: now.minute);
+
+class HeadacheFormMenu extends StatefulWidget {
+  @override
+  State<HeadacheFormMenu> createState() => _HeadacheFormState();
+}
+
+class _HeadacheFormState extends State<HeadacheFormMenu> {
+  // Text field controller:
+
+  DateTime _date = todayDate;
+  TimeOfDay _TODHeadache = TODNow;
+
+  var intensityRange = ['Mild','Moderate','Strong','Intense'];
+  var pages = [
+    SymptomFormMenu(),
+    MedicineFormMenu()];
+  int _intensityLevel = 0;
+
+  void _submitHeadacheForm() {
+    // Form submission.
+    // You can access the values of the form inputs using the _sleepQuality,
+    // _hours, _minutes, and _image variables.
+  }
+
+  void _navigateToNextScreen(BuildContext context,int pageIdx) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) => pages[pageIdx]));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,10 +41,10 @@ class HeadacheFormMenu extends StatelessWidget {
           color: Colors.lightBlueAccent
       ),
 
-      // Row 1
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
+          // Row 1
           Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -33,7 +64,7 @@ class HeadacheFormMenu extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  height: 50,
+                  height: 100,
                   width: 350,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(
@@ -41,39 +72,81 @@ class HeadacheFormMenu extends StatelessWidget {
                       ),
                       color: Colors.white
                   ),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                       children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-                          child: Icon(
-                            Icons.calendar_today_outlined,
-                            color: Colors.black,
-                            size: 25.0,
-                          ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                                child: Icon(
+                                  Icons.calendar_today_outlined,
+                                  color: Colors.black,
+                                  size: 25.0,
+                                ),
+                              ),
+                              Container(
+                                child: Text("What was the date?",
+                                  style: TextStyle(
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'ComicNeue',
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                child: IconButton(
+                                  onPressed: () {
+                                    // Reset date
+                                    now = DateTime.now();
+                                    todayDate = DateTime(now.year,now.month,now.day);
+                                    setState(() => _date = todayDate);
+                                  },
+                                  icon: Icon(
+                                    Icons.loop,
+                                    size: 25.0,
+                                  ),
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ]
                         ),
-                        Container(
-                          child: Text("What was the date?",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'ComicNeue',
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                              child: Text("${_date.year}/${_date.month}/${_date.day}",
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontFamily: 'ComicNeue',
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        Container(
-                          child: IconButton(
-                            onPressed: () {
-                              // Impletement goto page here!
-                            },
-                            icon: Icon(
-                              Icons.add,
-                              size: 25.0,
+
+                            Container(
+                              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                              child: ElevatedButton(
+                                onPressed: () async{
+                                  DateTime? newDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: _date,
+                                    firstDate: DateTime(2010),  // Is this a reasonable first available year?
+                                    lastDate: todayDate,
+                                  );
+
+                                  // if the function returns null, it means "Cancel" has been pressed
+                                  if (newDate != null){
+                                    setState(() => _date = newDate);
+                                  }
+                                },
+                                child: Text('Select Date'),
+                              ),
                             ),
-                            color: Colors.grey,
-                          ),
+                          ],
                         ),
                       ]
+
                   ),
                 ),
               ]
@@ -84,7 +157,7 @@ class HeadacheFormMenu extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  height: 50,
+                  height: 100,
                   width: 350,
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(
@@ -92,39 +165,78 @@ class HeadacheFormMenu extends StatelessWidget {
                       ),
                       color: Colors.white
                   ),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-                          child: Icon(
-                            Icons.timelapse_rounded,
-                            color: Colors.purpleAccent,
-                            size: 25.0,
-                          ),
-                        ),
-                        Container(
-                          child: Text("Period of the day?",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'ComicNeue',
-                            ),
-                          ),
-                        ),
-                        Container(
-                          child: IconButton(
-                            onPressed: () {
-                              // Impletement goto page here!
-                            },
-                            icon: Icon(
-                              Icons.add,
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                            child: Icon(
+                              Icons.timelapse_rounded,
+                              color: Colors.purpleAccent,
                               size: 25.0,
                             ),
-                            color: Colors.grey,
                           ),
-                        ),
-                      ]
+                          Container(
+                            child: Text("Period of the day?",
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'ComicNeue',
+                              ),
+                            ),
+                          ),
+                          Container(
+                            child: IconButton(
+                              onPressed: () {
+                                // Reset date
+                                now = DateTime.now();
+                                TODNow = TimeOfDay(hour: now.hour, minute: now.minute);
+                                setState(() => _TODHeadache = TODNow);
+                              },
+                              icon: Icon(
+                                Icons.loop,
+                                size: 25.0,
+                              ),
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                            child: Text("${_TODHeadache.hour}:${_TODHeadache.minute}",
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontFamily: 'ComicNeue',
+                              ),
+                            ),
+                          ),
+
+                          Container(
+                            padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                            child: ElevatedButton(
+                              onPressed: () async{
+                                TimeOfDay? newTime = await showTimePicker(
+                                  context: context,
+                                  initialTime: _TODHeadache,
+                                );
+
+                                // if the function returns null, it means "Cancel" has been pressed
+                                if (newTime != null){
+                                  setState(() => _TODHeadache = newTime);
+                                }
+                              },
+                              child: Text('Select Time'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ]
@@ -135,48 +247,85 @@ class HeadacheFormMenu extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Container(
-                  height: 50,
-                  width: 350,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(
-                          Radius.circular(10)
-                      ),
-                      color: Colors.white
-                  ),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    height: 100,
+                    width: 350,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(
+                            Radius.circular(10)
+                        ),
+                        color: Colors.white
+                    ),
+                    child: Column(
                       children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-                          child: Icon(
-                            Icons.speed_sharp,
-                            color: Colors.amber,
-                            size: 25.0,
-                          ),
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                                child: Icon(
+                                  Icons.speed_sharp,
+                                  color: Colors.amber,
+                                  size: 25.0,
+                                ),
+                              ),
+                              Container(
+                                child: Text("Intensity?",
+                                  style: TextStyle(
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'ComicNeue',
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                child: IconButton(
+                                  onPressed: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title: Text("Headache Levels"),
+                                          content: Text(
+                                            "Mild means .. \n\nModerate means .. \n\nStrong means .. \n\nIntense means ..",
+                                          ),
+                                          actions: [
+                                            TextButton(
+                                              child: Text("OK"),
+                                              onPressed: () => Navigator.pop(context),
+                                            ),
+                                          ],
+                                        )
+                                    );
+                                  },
+                                  icon: Icon(
+                                    Icons.question_mark,
+                                    size: 25.0,
+                                  ),
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ]
                         ),
-                        Container(
-                          child: Text("Intensity?",
-                            style: TextStyle(
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'ComicNeue',
-                            ),
-                          ),
+                        Row(
+                            children: <Widget>[
+                              Expanded(
+                                  child:
+                                  Slider(
+                                    value: _intensityLevel.toDouble(),
+                                    max: 3,
+                                    divisions: 4,
+                                    label: intensityRange[_intensityLevel.round()],
+                                    onChanged: (double value) {
+                                      setState(() {
+                                        _intensityLevel = value.toInt();
+                                      });
+                                    },
+                                  )
+                              )
+                            ]
                         ),
-                        Container(
-                          child: IconButton(
-                            onPressed: () {
-                              // Impletement goto page here!
-                            },
-                            icon: Icon(
-                              Icons.add,
-                              size: 25.0,
-                            ),
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ]
-                  ),
+                      ],
+                    )
+
                 ),
               ]
           ),
@@ -217,7 +366,8 @@ class HeadacheFormMenu extends StatelessWidget {
                         Container(
                           child: IconButton(
                             onPressed: () {
-                              // Impletement goto page here!
+                              // Goto symptoms page form, retrieve filled in data
+                              _navigateToNextScreen(context,0);
                             },
                             icon: Icon(
                               Icons.add,
@@ -268,7 +418,8 @@ class HeadacheFormMenu extends StatelessWidget {
                         Container(
                           child: IconButton(
                             onPressed: () {
-                              // Impletement goto page here!
+                              // Goto medicine page
+                              _navigateToNextScreen(context,1);
                             },
                             icon: Icon(
                               Icons.add,
@@ -282,7 +433,7 @@ class HeadacheFormMenu extends StatelessWidget {
                 ),
               ]
           ),
-
+          //
           //  Row 7
           Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -345,6 +496,7 @@ class HeadacheFormMenu extends StatelessWidget {
                 ),
               ]
           ),
+
         ],
       ),
     );
