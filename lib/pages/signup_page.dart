@@ -80,9 +80,6 @@ class _signup_pageState extends State<signup_page> {
         appBar: AppBar(
           title: Text('Login with Signup'),
         ),
-        // Form(
-        // key: _formKey,
-        //child:
         body: Form(
           key: _formKey,
           child: SingleChildScrollView(

@@ -6,17 +6,16 @@ import 'package:fluttertest/databasehandler/databaseconnect.dart';
 import 'package:fluttertest/userdata/userfile.dart';
 import 'package:fluttertest/pages/signup_page.dart';
 import 'package:fluttertest/pages/Home_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-//import 'package:shared_preferences/shared_preferences.dart';
-
-class _login_page extends StatefulWidget {
+class login_page extends StatefulWidget {
   @override
   _login_pageState createState() => _login_pageState();
 }
 
-class login_pageState extends State<login_page> {
-//  Future<SharedPreferences> _pref = SharedPreferences.getInstance();
-//  final _formKey = new GlobalKey<FormState>();
+class _login_pageState extends State<login_page> {
+  Future<SharedPreferences> _pref = SharedPreferences.getInstance();
+  final _formKey = new GlobalKey<FormState>();
 
   final _conUserId = TextEditingController();
   final _conPassword = TextEditingController();
@@ -39,11 +38,11 @@ class login_pageState extends State<login_page> {
     } else {
       await databaseconnect.getLoginUser(uid, passwd).then((userData) {
         if (userData != null) {
-          //setSP(userData).whenComplete(() {
+          setSP(userData).whenComplete(() {
             Navigator.pushAndRemoveUntil(
                 context, MaterialPageRoute(builder: (_) => MyHomePage()),
                     (Route<dynamic> route) => false);
-        //  });
+          });
         } else {
           alertDialog(context, "Error: User Not Found");
         }
@@ -54,14 +53,15 @@ class login_pageState extends State<login_page> {
     }
   }
 
-//  Future setSP(UserModel user) async {
-  //  final SharedPreferences sp = await _pref;
+  Future setSP(userfile user) async {
+    final SharedPreferences sp = await _pref;
 
-    //sp.setString("user_id", user.user_id);
-   // sp.setString("user_name", user.user_name);
-    //sp.setString("email", user.email);
-    //sp.setString("password", user.password);
-  //}
+    sp.setString("user_id", user.user_id);
+    sp.setString("user_name", user.user_name);
+    sp.setString("email", user.email);
+    sp.setString("password", user.password);
+    sp.setString("user_gender", user.user_gender);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +80,7 @@ class login_pageState extends State<login_page> {
                 text_field(
                     controller: _conUserId,
                     icon: Icons.person,
-                    hintName: 'User ID'),
+                    hintName: 'User ID',),
                 SizedBox(height: 10.0),
                 text_field(
                   controller: _conPassword,
