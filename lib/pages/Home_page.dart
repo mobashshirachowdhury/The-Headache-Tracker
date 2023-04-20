@@ -93,6 +93,10 @@ class _MyHomePageState extends State<MyHomePage> {
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.check_box_outlined),
+            label: 'Profile',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.check_box_outlined),
             label: 'Daily Form',
           ),
           BottomNavigationBarItem(
