@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:fluttertest/components/text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
+import 'package:fluttertest/userdata/userfile.dart';
+import 'package:fluttertest/components/helptofill.dart';
+import 'package:fluttertest/components/loginsignupheader.dart';
+import 'package:fluttertest/databasehandler/databaseconnect.dart';
+import 'package:toast/toast.dart';
+import 'package:fluttertest/pages/login_page.dart';
+import 'package:fluttertest/pages/signup_page.dart';
 
 class userprofile_info extends StatefulWidget {
   @override
   _userprofile_infoState createState() => _userprofile_infoState();
-}
-
-
+  String userName = "";
 //          updateSP(user, true).whenComplete(() {
   //          Navigator.pushAndRemoveUntil(
     //            context,
@@ -49,10 +54,16 @@ class userprofile_info extends StatefulWidget {
       //sp.remove('email');
       //sp.remove('password');
     //}
-  //}
+}
 class _userprofileState extends State<userprofile_info> {
   Future<SharedPreference> _pref = SharedPreferences.getInstance();
   String userName = "";
+
+  final _conUserId = TextEditingController();
+  final _conUserName = TextEditingController();
+  final _conEmail = TextEditingController();
+  final _conPassword = TextEditingController();
+  final _conUserGender = TextEditingController();
 
   @override
   void initState(){
@@ -63,8 +74,15 @@ class _userprofileState extends State<userprofile_info> {
     final SharedPreferences sp = await _pref;
 
     setState(() {
-      userName = sp.getString("user_name")!;
+      _conUserId.text= sp.getString("user_id")!;
+      _conUserName.text= sp.getString("user_name")!;
+      _conEmail.text= sp.getString("email")!;
+      _conPassword.text= sp.getString("password")!;
+      _conUserGender.text= sp.getString("user_gender")!;
+
     });
+  }
+  update(){
   }
 
   @override
@@ -74,18 +92,19 @@ class _userprofileState extends State<userprofile_info> {
         title: Text('Profile Info'),
       ),
       body: Form(
-        key: _formKey,
+        key: _formkey,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Container(
-            //margin: EdgeInsets.only(top: 20.0),
+            margin: EdgeInsets.only(top: 20.0),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                 //  Update
                   text_field(
-                    //  controller: _conUserId,
+                      controller: _conUserId,
+                      readonly: true,
                       //isEnable: false,
                       icon: Icons.person,
                       hintName: 'User ID'),
@@ -107,6 +126,13 @@ class _userprofileState extends State<userprofile_info> {
                     icon: Icons.lock,
                     hintName: 'Password',
                     isObscureText: true,
+                  ),
+                  SizedBox(height: 10.0),
+                  text_field(
+                    controller: _conUserGender,
+                    icon: Icons.person,
+                    inputType: TextInputType.name,
+                    hintName: 'Gender',
                   ),
                   SizedBox(height: 10.0),
                   Container(
@@ -142,7 +168,7 @@ class _userprofileState extends State<userprofile_info> {
                         //'Delete',
                         style: TextStyle(color: Colors.white),
                       ),
-                      onPressed: delete,
+                      //onPressed: delete,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.blue,

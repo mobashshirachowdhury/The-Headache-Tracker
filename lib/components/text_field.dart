@@ -7,12 +7,15 @@ class text_field extends StatelessWidget {
   IconData icon;
   bool isObscureText;
   TextInputType inputType;
-  //bool isEnable;
+  bool readonly;
 
   text_field(
-      {this.controller, this.hintName, this.icon,
-        this.isObscureText = false, this.inputType = TextInputType.text, required TextInputType keyboardType, required bool obscureText, required String? Function(dynamic value) validator,
-        //this.isEnable = true
+      { this.controller,
+        this.hintName,
+        this.icon,
+        this.isObscureText = false,
+        this.inputType = TextInputType.text,
+        this.readonly = false
       });
 
   @override
