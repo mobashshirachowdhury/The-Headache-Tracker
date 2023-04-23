@@ -17,6 +17,7 @@ class userprofile_infoState extends State<userprofile_info> {
   late databaseconnect dbhelp;
 
   final _conUserId = TextEditingController();
+  final _condelUserId = TextEditingController();
   final _conUserName = TextEditingController();
   final _conEmail = TextEditingController();
   final _conPassword = TextEditingController();
@@ -34,12 +35,13 @@ class userprofile_infoState extends State<userprofile_info> {
     final SharedPreferences sp = await _pref;
 
     setState(() {
-      _conUserId.text= sp.getString("user_id")!;
+      _conUserId.text= sp.getString('user_id')!;
+      _condelUserId.text= sp.getString("user_id")!;
+      _condelUserId.text= sp.getString("user_id")!;
       _conUserName.text= sp.getString("user_name")!;
       _conEmail.text= sp.getString("email")!;
       _conPassword.text= sp.getString("password")!;
       _conUserGender.text= sp.getString("user_gender")!;
-
     });
   }
 
@@ -58,7 +60,7 @@ class userprofile_infoState extends State<userprofile_info> {
         if (value == 1) {
           alertDialog(context, "Successfully Updated");
 
-          updateSP(null, false).whenComplete(() {
+          updateSP(user, true).whenComplete(() {
             Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (_) => login_page()),
@@ -75,13 +77,13 @@ class userprofile_infoState extends State<userprofile_info> {
   }
 
   delete() async {
-    String delUserID = _conDelUserId.text;
+    String delUserID = _condelUserId.text;
 
     await dbhelp.deleteUser(delUserID).then((value) {
       if (value == 1) {
         alertDialog(context, "Successfully Deleted");
 
-        updateSP(null, false).whenComplete(() {
+        updateSP(delUserID as userfile, false).whenComplete(() {
           Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (_) => login_page()),
@@ -175,7 +177,7 @@ class userprofile_infoState extends State<userprofile_info> {
                   //Delete
 
                   text_field(
-                      controller: _conDelUserId,
+                      controller: _condelUserId,
                       enable: false,
                       icon: Icons.person,
                       hintName: 'User ID'),
@@ -189,12 +191,11 @@ class userprofile_infoState extends State<userprofile_info> {
                       borderRadius: BorderRadius.circular(30.0),
                     ),
                     child: TextButton(
-                      onPressed: delete,
                       child: Text(
                         'Delete',
                         style: TextStyle(color: Colors.white),
                       ),
-
+                      onPressed: delete,
                     ),
                   ),
                 ],
@@ -205,3 +206,4 @@ class userprofile_infoState extends State<userprofile_info> {
       ),
     );
   }
+}
