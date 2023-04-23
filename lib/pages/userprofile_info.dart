@@ -1,64 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertest/components/text_field.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:io';
 import 'package:fluttertest/userdata/userfile.dart';
 import 'package:fluttertest/components/helptofill.dart';
-import 'package:fluttertest/components/loginsignupheader.dart';
 import 'package:fluttertest/databasehandler/databaseconnect.dart';
-import 'package:toast/toast.dart';
 import 'package:fluttertest/pages/login_page.dart';
-import 'package:fluttertest/pages/signup_page.dart';
 
 class userprofile_info extends StatefulWidget {
   @override
   userprofile_infoState createState() => userprofile_infoState();
 }
-  //String userName = "";
-//          updateSP(user, true).whenComplete(() {
-  //          Navigator.pushAndRemoveUntil(
-    //            context,
-      //          MaterialPageRoute(builder: (_) => LoginForm()),
-        //            (Route<dynamic> route) => false);});
-//        } else {
-  //        alertDialog(context, "Error Update");}
-//      }).catchError((error) {
-  //      print(error);
-    //    alertDialog(context, "Error");}); } }
 
-//  delete() async {
-  //  String delUserID = _conDelUserId.text;
-
-    //await dbHelper.deleteUser(delUserID).then((value) {
-      //if (value == 1) {
-        //alertDialog(context, "Successfully Deleted");
-
-//        updateSP(null, false).whenComplete(() {
-  //        Navigator.pushAndRemoveUntil(
-    //          context,
-      //        MaterialPageRoute(builder: (_) => LoginForm()),
-        //          (Route<dynamic> route) => false);
-        //});}
-   // });
-  //}
-
- // Future updateSP(UserModel user, bool add) async {
-    //final SharedPreferences sp = await _pref;
-
-//    if (add) {
-  //    sp.setString("user_name", user.user_name);
-    //  sp.setString("email", user.email);
-      //sp.setString("password", user.password);
-//    } else {
-  //    sp.remove('user_id');
-    //  sp.remove('user_name');
-      //sp.remove('email');
-      //sp.remove('password');
-    //}
-}
 class userprofile_infoState extends State<userprofile_info> {
-  Future<SharedPreference> _pref = SharedPreferences.getInstance();
-  String userName = "";
+  Future<SharedPreferences> _pref = SharedPreferences.getInstance();
+  final _formKey = new GlobalKey<FormState>();
+  late databaseconnect dbhelp;
 
   final _conUserId = TextEditingController();
   final _conUserName = TextEditingController();
@@ -70,7 +26,10 @@ class userprofile_infoState extends State<userprofile_info> {
   void initState(){
     super.initState();
     getUserData();
+
+    dbhelp = databaseconnect();
   }
+
   Future<void> getUserData()async {
     final SharedPreferences sp = await _pref;
 
@@ -83,7 +42,69 @@ class userprofile_infoState extends State<userprofile_info> {
 
     });
   }
-  update(){
+
+  update() async {
+    String uid = _conUserId.text;
+    String uname = _conUserName.text;
+    String email = _conEmail.text;
+    String passwd = _conPassword.text;
+    String ugender = _conUserGender.text;
+
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      userfile user = userfile(uid, uname, email, passwd, ugender);
+      await dbhelp.updateUser(user).then((value) {
+        if (value == 1) {
+          alertDialog(context, "Successfully Updated");
+
+          updateSP(null, false).whenComplete(() {
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => login_page()),
+                    (Route<dynamic> route) => false);
+          });
+        } else {
+          alertDialog(context, "Error Update");
+        }
+      }).catchError((error) {
+        print(error);
+        alertDialog(context, "Error");
+      });
+    }
+  }
+
+  delete() async {
+    String delUserID = _conDelUserId.text;
+
+    await dbhelp.deleteUser(delUserID).then((value) {
+      if (value == 1) {
+        alertDialog(context, "Successfully Deleted");
+
+        updateSP(null, false).whenComplete(() {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => login_page()),
+                  (Route<dynamic> route) => false);
+        });
+      }
+    });
+  }
+
+  Future updateSP(userfile user, bool add) async {
+    final SharedPreferences sp = await _pref;
+
+    if (add) {
+      sp.setString("user_name", user.user_name);
+      sp.setString("email", user.email);
+      sp.setString("password", user.password);
+    } else {
+      sp.remove('user_id');
+      sp.remove('user_name');
+      sp.remove('email');
+      sp.remove('password');
+      sp.remove('user_gender');
+    }
   }
 
   @override
@@ -93,7 +114,7 @@ class userprofile_infoState extends State<userprofile_info> {
         title: Text('Profile Info'),
       ),
       body: Form(
-        key: _formkey,
+        key: _formKey,
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Container(
@@ -138,7 +159,7 @@ class userprofile_infoState extends State<userprofile_info> {
                   Container(
                     margin: EdgeInsets.all(30.0),
                     width: double.infinity,
-                    child: FlatButton(
+                    child: TextButton(
                       child: Text(
                         'Update',
                         style: TextStyle(color: Colors.white),
@@ -155,7 +176,7 @@ class userprofile_infoState extends State<userprofile_info> {
 
                   text_field(
                       controller: _conDelUserId,
-                      isEnable: false,
+                      enable: false,
                       icon: Icons.person,
                       hintName: 'User ID'),
                   SizedBox(height: 10.0),
@@ -163,16 +184,17 @@ class userprofile_infoState extends State<userprofile_info> {
                   Container(
                     margin: EdgeInsets.all(30.0),
                     width: double.infinity,
-                    child: FlatButton(
-                      child: Text(
-                        //'Delete',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      //onPressed: delete,
-                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(30.0),
+                    ),
+                    child: TextButton(
+                      onPressed: delete,
+                      child: Text(
+                        'Delete',
+                        style: TextStyle(color: Colors.white),
+                      ),
+
                     ),
                   ),
                 ],
@@ -183,4 +205,3 @@ class userprofile_infoState extends State<userprofile_info> {
       ),
     );
   }
-}
