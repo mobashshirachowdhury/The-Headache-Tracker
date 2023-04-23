@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:toast/toast.dart';
+import 'package:fluttertoast/fluttertoast.dart/';
 
 alertDialog(BuildContext context, String msg) {
-  Toast.show(msg, textStyle: context, duration: Toast.LENGTH_LONG,
-      gravity: Toast.BOTTOM);
+  Fluttertoast.showToast(toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM, msg: 'Enter Valid Mail');
 }
 validateEmail(String email) {
   final emailReg = new RegExp(

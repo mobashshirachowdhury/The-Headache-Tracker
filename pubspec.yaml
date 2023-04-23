@@ -48,6 +48,8 @@ dev_dependencies:
   #format date_time
   intl: ^0.18.0
   #toast dependencies:
+  cupertino_icons: ^1.0.5
+  fluttertoast: ^8.2.1
   toast: ^0.3.0
   #shared preferences dependancies
   shared_preferences: ^2.1.0

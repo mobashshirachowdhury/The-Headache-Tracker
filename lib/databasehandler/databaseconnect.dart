@@ -5,7 +5,7 @@ import 'package:path/path.dart';
 import 'dart:io' as io;
 
 class databaseconnect {
-  static Database _db;
+  late Database db;
 
   static const String DB_Name = 'headache.db';
   static const String Table_Userinfo = 'userinfo';
@@ -17,12 +17,12 @@ class databaseconnect {
   static const String C_Password = 'password';
   static const String C_UserGender = 'user_gender';
 
-  Future<Database> get db async {
-    if (_db != null) {
-      return _db;
+  Future<Database> get async async {
+    if (db != null) {
+      return db;
     }
-    _db = await initDb();
-    return _db;
+    db = await initDb();
+    return db;
   }
 
   initDb() async {
@@ -49,7 +49,7 @@ class databaseconnect {
     return user;
   }
 
-  Future<userfile> getLoginUser(String userId, String password) async {
+  Future<userfile> get (String userId, String password) async {
     var dbClient = await db;
     var res = await dbClient.rawQuery("SELECT * FROM $Table_Userinfo WHERE "
         "$C_UserId = '$userId' AND " "$C_Password = '$password'");

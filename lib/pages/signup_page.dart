@@ -29,13 +29,6 @@ class _signup_pageState extends State<signup_page> {
     super.initState();
     databaseconnect = databaseconnect();
 }
-
-  @override
-  void initState() {
-    super.initState();
-    databaseconnect = databaseconnect();
-  }
-
   signup() async {
     final form = _formKey.currentState;
 
@@ -48,11 +41,11 @@ class _signup_pageState extends State<signup_page> {
 
    // if(form.validate()){
 
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState!.validate()) {
       if (passwd != cpasswd) {
         alertDialog(context, 'Password Mismatch');
       } else {
-        _formKey.currentState.save();
+        _formKey.currentState?.save();
 
         userfile uModel = userfile(uid, uname, email, passwd, ugender);
         await databaseconnect.saveData(uModel).then((userData){
@@ -93,19 +86,19 @@ class _signup_pageState extends State<signup_page> {
                     text_field(
                         controller: _conUserId,
                         icon: Icons.person,
-                        hintName: 'User ID'),
+                        hintName: 'User ID',),
                     SizedBox(height: 10.0),
                     text_field(
                         controller: _conUserName,
                         icon: Icons.person_outline,
                         inputType: TextInputType.name,
-                        hintName: 'User Name'),
+                        hintName: 'User Name',),
                     SizedBox(height: 5.0),
                     text_field(
                         controller: _conEmail,
                         icon: Icons.email,
                         inputType: TextInputType.emailAddress,
-                        hintName: 'Email'),
+                        hintName: 'Email',),
                     SizedBox(height: 5.0),
                     text_field(
                       controller: _conPassword,
@@ -130,7 +123,7 @@ class _signup_pageState extends State<signup_page> {
                     Container(
                       margin: EdgeInsets.all(30.0),
                       width: double.infinity,
-                      child: FlatButton(
+                      child: TextButton(
                         child: Text(
                           'Signup',
                           style: TextStyle(color: Colors.white),
@@ -147,14 +140,13 @@ class _signup_pageState extends State<signup_page> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                           Text('Have account Already? '),
-                      FlatButton(
-                        textColor: Colors.blue,
+                      TextButton(
+                          //onPressed: onPressed,
+                        //textColor: Colors.blue,
                         child: Text('Sign In'),
                         onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                              context,
+                          Navigator.push(context,
                               MaterialPageRoute(builder: (_) => login_page()));
-                                  (Route<dynamic> route) => false);
                         },
                       )
                           ],

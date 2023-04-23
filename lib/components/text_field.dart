@@ -2,21 +2,29 @@ import 'package:flutter/material.dart';
 import 'helptofill.dart';
 
 class text_field extends StatelessWidget {
+  //const text_field({Key? key}) : super(key: key);
   TextEditingController controller;
   String hintName;
   IconData icon;
   bool isObscureText;
   TextInputType inputType;
-  bool readonly;
+  bool enable;
+  validator;
+  decoration;
 
   text_field(
-      { this.controller,
-        this.hintName,
-        this.icon,
+      { required this.controller,
+        required this.hintName,
+        required this.icon,
         this.isObscureText = false,
         this.inputType = TextInputType.text,
-        this.readonly = false
+        this.enable = true,
+        //required keyboardType,
+       // required decoration,
+        //required String? Function(dynamic value) validator
       });
+
+  get isEnable => null;
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +32,9 @@ class text_field extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 20.0),
       child: text_field(
         controller: controller,
-        obscureText: isObscureText,
-        //enabled: isEnable,
-        keyboardType: TextInputType.text,
+        isObscureText: isObscureText,
+        enable: isEnable,
+        inputType: TextInputType.text,
         validator: (value) {
            if (value == null || value.isEmpty) {
              return 'Please enter $hintName';
@@ -50,7 +58,7 @@ class text_field extends StatelessWidget {
         labelText: hintName,
         fillColor: Colors.grey[200],
         filled: true
-        ),
+        ), hintName: '', icon: icon,
       ),
     );
   }
