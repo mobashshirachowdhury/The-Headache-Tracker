@@ -9,8 +9,8 @@ class text_field extends StatelessWidget {
   bool isObscureText;
   TextInputType inputType;
   bool enable;
-  validator;
-  decoration;
+  var validator;
+  var decoration;
 
   text_field(
       { required this.controller,
@@ -20,8 +20,8 @@ class text_field extends StatelessWidget {
         this.inputType = TextInputType.text,
         this.enable = true,
         //required keyboardType,
-       // required decoration,
-        //required String? Function(dynamic value) validator
+        this.decoration,
+        this.validator
       });
 
   get isEnable => null;

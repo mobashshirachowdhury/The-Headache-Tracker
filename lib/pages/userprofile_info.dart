@@ -12,8 +12,9 @@ import 'package:fluttertest/pages/signup_page.dart';
 
 class userprofile_info extends StatefulWidget {
   @override
-  _userprofile_infoState createState() => _userprofile_infoState();
-  String userName = "";
+  userprofile_infoState createState() => userprofile_infoState();
+}
+  //String userName = "";
 //          updateSP(user, true).whenComplete(() {
   //          Navigator.pushAndRemoveUntil(
     //            context,
@@ -55,7 +56,7 @@ class userprofile_info extends StatefulWidget {
       //sp.remove('password');
     //}
 }
-class _userprofileState extends State<userprofile_info> {
+class userprofile_infoState extends State<userprofile_info> {
   Future<SharedPreference> _pref = SharedPreferences.getInstance();
   String userName = "";
 

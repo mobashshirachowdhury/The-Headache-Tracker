@@ -49,7 +49,7 @@ class databaseconnect {
     return user;
   }
 
-  Future<userfile> get (String userId, String password) async {
+  Future<userfile?> getLoginUser(String userId, String password) async {
     var dbClient = await db;
     var res = await dbClient.rawQuery("SELECT * FROM $Table_Userinfo WHERE "
         "$C_UserId = '$userId' AND " "$C_Password = '$password'");
@@ -57,19 +57,20 @@ class databaseconnect {
     if (res.length > 0) {
       return userfile.fromMap(res.first);
     }
-
-//    return null;}
-
-//  Future<int> updateUser(UserModel user) async {
-  //  var dbClient = await db;
-    //var res = await dbClient.update(Table_User, user.toMap(),
-      //  where: '$C_UserID = ?', whereArgs: [user.user_id]);
-    //return res;
+    return null;
   }
 
-//  Future<int> deleteUser(String user_id) async {
-  //  var dbClient = await db;
-    //var res = await dbClient
-      //  .delete(Table_User, where: '$C_UserID = ?', whereArgs: [user_id]);
-    //return res;}
+  Future<int> updateUser(userfile user) async {
+    var dbClient = await db;
+    var res = await dbClient.update(Table_Userinfo, user.toMap(),
+        where: '$C_UserId = ?', whereArgs: [user.user_id]);
+    return res;
+  }
+
+  Future<int> deleteUser(String user_id) async {
+    var dbClient = await db;
+    var res = await dbClient
+        .delete(Table_Userinfo, where: '$C_UserId = ?', whereArgs: [user_id]);
+    return res;
+  }
 }
