@@ -1,6 +1,6 @@
 // For Directory
 import 'dart:io';
-
+import 'package:fluttertest/databasehandler/databaseconnect.dart';
 import 'package:sqflite/sqflite.dart';
 
 // For join()
@@ -8,12 +8,15 @@ import 'package:path/path.dart';
 // For getApplicationDocumentsDirectory()
 import 'package:path_provider/path_provider.dart';
 
+DateTime now = DateTime.now();
+DateTime todayDate = DateTime(now.year,now.month,now.day);
+
 class DailyFormInput {
 // Primary key:
   final int? dailyEntryid;
-  final String? userid;      // Foreign key
+  final String? userid; //userid; //C_UserId from table userinfo      // Foreign key
   final int TS;             // Seconds since epoch of DateTime.now();
-
+  final int TS_DATE;
   // Other fields:
   final double sleepQuality;
   final int sleepHours;
@@ -24,16 +27,15 @@ class DailyFormInput {
   final String? didExercise;
   final String exerciseType;
 
-  // What is the format of this supposed to be???? I'll keep it to String for now
-  final String exerciseDuration;
+  final int exerciseDurationMin;
 
-  DailyFormInput({this.dailyEntryid, this.userid, required this.TS, required this.sleepQuality, required this.sleepHours, required this.sleepMinutes, required this.dailyDescription, required this.stressLV, required this.didExercise, required this.exerciseType, required this.exerciseDuration});
+  DailyFormInput({this.dailyEntryid, this.userid, required this.TS, required this.TS_DATE, required this.sleepQuality, required this.sleepHours, required this.sleepMinutes, required this.dailyDescription, required this.stressLV, required this.didExercise, required this.exerciseType, required this.exerciseDurationMin});
 
   factory DailyFormInput.fromMap(Map<String, dynamic> json) => DailyFormInput(
     dailyEntryid: json['dailyEntryid'],
     userid: json['userid'],
     TS: json['TS'],
-
+    TS_DATE: json['TS_DATE'],
     sleepQuality: json['sleepquality'],
     sleepHours: json['sleepHours'],
     sleepMinutes: json['sleepMinutes'],
@@ -42,7 +44,7 @@ class DailyFormInput {
     stressLV: json['stressLV'],
     didExercise: json['didExercise'],
     exerciseType: json['exerciseType'],
-    exerciseDuration: json['exerciseDuration'],
+    exerciseDurationMin: json['exerciseDurationMin'],
   );
 
   Map<String,dynamic> toMap(){
@@ -50,6 +52,7 @@ class DailyFormInput {
       'dailyEntryid': dailyEntryid,
       'userid':userid,
       'TS':TS,
+      'TS_DATE':TS_DATE,
       'sleepQuality':sleepQuality,
       'sleepHours':sleepHours,
       'sleepMinutes':sleepMinutes,
@@ -57,7 +60,7 @@ class DailyFormInput {
       'stressLV': stressLV,
       'didExercise': didExercise,
       'exerciseType': exerciseType,
-      'exerciseDuration': exerciseDuration,
+      'exerciseDurationMin': exerciseDurationMin,
     };
   }
 }
@@ -68,6 +71,7 @@ class DailyFormDBHelper{
 
   static Database? _DailyFormDB;
   // Init DB if _DailyFormDB is null
+
   Future<Database> get database async => _DailyFormDB ??= await _initDatabase();
 
   Future<Database> _initDatabase() async{
@@ -80,7 +84,6 @@ class DailyFormDBHelper{
       onCreate: _onCreate,
     );
   }
-
   // Create Table
   Future _onCreate(Database db, int version) async {
     await db.execute(
@@ -88,7 +91,8 @@ class DailyFormDBHelper{
         CREATE TABLE DailyForm(
           dailyEntryid INTEGER PRIMARY KEY AUTOINCREMENT,
           userid TEXT NOT NULL,     
-          TS INT NOT NULL,         
+          TS INT NOT NULL, 
+          TS_DATE INT NOT NULL,
           sleepQuality DOUBLE,
           sleepHours INTEGER,
           sleepMinutes INTEGER,
@@ -96,7 +100,7 @@ class DailyFormDBHelper{
           stressLV INT,
           didExercise TEXT,
           exerciseType TEXT,
-          exerciseDuration TEXT,
+          exerciseDurationMin INT,
           UNIQUE(userid, TS)
         )
       '''
@@ -115,8 +119,11 @@ class DailyFormDBHelper{
   }
 
   fetchTableData() async{
+
     Database db = await instance.database;
-    final result = await db.query('DailyForm');
+
+    final result = await db.query('DailyForm',
+        orderBy:'dailyEntryid DESC');
 
     // print(result);
     return result;
@@ -151,6 +158,48 @@ class DailyFormDBHelper{
     }
 
     return null;
+  }
+
+  Future<Map<String, dynamic>?> fetchLatestDailyFormByUserIdAndDate(String userId, DateTime date) async {
+    final Database db = await instance.database;
+    var date_ts = date.millisecondsSinceEpoch;
+    int TS_DATE = (date_ts / 1000).round();
+
+    var result = await db.rawQuery(
+      '''
+      SELECT * FROM DailyForm
+      WHERE userid = ?
+      AND TS_DATE = ?
+      ORDER BY TS DESC
+      LIMIT 1;
+      ''',
+      [userId, TS_DATE],
+    );
+
+    if (result.isNotEmpty) {
+      // print(result.first);
+      return result.first;
+    }
+
+    return null;
+  }
+
+  Future<List<Map<String, dynamic>>> fetchValidEntriesForUser(String userId) async {
+    final db = await database;
+    final results = await db.rawQuery(
+      '''
+        SELECT *
+        FROM DailyForm AS DF1
+        INNER JOIN (
+          SELECT TS_DATE, MAX(TS) AS maxTS FROM DailyForm
+          WHERE userid = ?
+          GROUP BY TS_DATE
+        ) AS DF2 ON DF1.TS_DATE = DF2.TS_DATE AND DF1.TS = DF2.maxTS
+        WHERE DF1.userid = ?
+      ''',
+      [userId, userId]);
+    // print(results);
+    return results;
   }
 
   Future<int> add(DailyFormInput dailyFormInput) async{

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:fluttertest/databasehandler/dailyForm.dart';
+
 class DailyForm extends StatefulWidget {
   @override
   State<DailyForm> createState() => _DailyFormState();
@@ -24,19 +26,77 @@ class _DailyFormState extends State<DailyForm> {
     });
   }
 
+  // Question: How do we store the image to db?
   double _sleepQuality = 50;
   int _hours = 0;
   int _minutes = 0;
   TextEditingController _textController = TextEditingController();
   int _stressLevel = 1;
+  // So pre fill-in for _didExercise == null
   String? _didExercise;
   String _exerciseType = '';
-  String _exerciseDuration = '';
+  int _exerciseH = 0;
+  int _exerciseMin = 0;
+  // For testing
+  String? userid = "3";
 
-  void _submitForm() {
+  void _submitForm() async{
     // This is where you would handle the form submission.
     // You can access the values of the form inputs using the _sleepQuality,
     // _hours, _minutes, and _image variables.
+
+    // For sleep quality, should we round it at the end?
+    // print("Sleep quality:" +_sleepQuality.toString());
+    //
+    // print("Sleep hours:" +_hours.toString());
+    // print("Sleep minutes:" +_minutes.toString());
+    // // How do we store the img?
+    //
+    // print("WDYD:" +_textController.text);
+    // print("Stress lv:" +_stressLevel.toString());
+    // print("did exercise:" + _didExercise.toString());
+    // print("exercise type:" + _exerciseType);
+    //
+    // // What is the input format expected for this?
+    // print("exercise dura:" + _exerciseDuration);
+    int exerciseDurationMin = _exerciseH * 60 + _exerciseMin;
+    // print(exerciseDurationMin);
+
+    var ms = (new DateTime.now()).millisecondsSinceEpoch;
+    int nowInSecondsSinceEpoch = (ms / 1000).round();
+
+    var today_ts = todayDate.millisecondsSinceEpoch;
+    int TS_DATE = (today_ts / 1000).round();
+
+    // For testing
+    // print(userid);
+    // var testDate = DateTime(2023,5,2);
+    // nowInSecondsSinceEpoch = (testDate.millisecondsSinceEpoch/1000).round() + 4;
+    // TS_DATE = (testDate.millisecondsSinceEpoch/1000).round();
+
+    await DailyFormDBHelper.instance.add(
+        DailyFormInput(
+          userid:userid,
+          TS:nowInSecondsSinceEpoch,
+          TS_DATE: TS_DATE,
+          sleepQuality:_sleepQuality,
+          sleepHours:_hours,
+          sleepMinutes:_minutes,
+          dailyDescription:_textController.text,
+          stressLV: _stressLevel,
+          didExercise: _didExercise,
+          exerciseType: _exerciseType,
+          exerciseDurationMin: exerciseDurationMin)
+    );
+
+    // Clear text
+    setState(() {
+      _textController.clear();
+    });
+
+    // DailyFormDBHelper.instance.fetchValidEntriesForUser("2");
+    // DailyFormDBHelper.instance.fetchValidEntriesForUser("3");
+    // DailyFormDBHelper.instance.fetchLatestDailyFormByUserId("3");
   }
 
   @override
@@ -79,6 +139,14 @@ class _DailyFormState extends State<DailyForm> {
                     },
                   ),
                 ),
+                SizedBox(width: 10),
+                Text(
+                  _sleepQuality.round().toString(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  )
+                ),
               ],
             ),
             SizedBox(height: 20),
@@ -88,6 +156,7 @@ class _DailyFormState extends State<DailyForm> {
                   'Sleep duration:',
                   style: TextStyle(fontSize: 16),
                 ),
+                SizedBox(width: 16.0),
                 SizedBox(
                   width: 70.0,
                   child: TextField(
@@ -169,6 +238,7 @@ class _DailyFormState extends State<DailyForm> {
             SizedBox(height: 5),
             TextField(
               maxLength: 50,
+              controller: _textController,
               decoration: InputDecoration(
                 hintText: 'Enter your text here',
                 border: OutlineInputBorder(),
@@ -221,7 +291,8 @@ class _DailyFormState extends State<DailyForm> {
                       _didExercise = value;
                       if (value == 'No') {
                         _exerciseType = '';
-                        _exerciseDuration = '';
+                        _exerciseH = 0;
+                        _exerciseMin = 0;
                       }
                     });
                   },
@@ -236,7 +307,8 @@ class _DailyFormState extends State<DailyForm> {
                       _didExercise = value;
                       if (value == 'No') {
                         _exerciseType = '';
-                        _exerciseDuration = '';
+                        _exerciseH = 0;
+                        _exerciseMin = 0;
                       }
                     });
                   },
@@ -255,14 +327,44 @@ class _DailyFormState extends State<DailyForm> {
                       _exerciseType = value;
                     },
                   ),
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Exercise duration',
-                    ),
-                    onChanged: (value) {
-                      _exerciseDuration = value;
-                    },
-                  ),
+                  SizedBox(height: 16.0),
+                  Row(
+                    children:[
+                      Text('Exercise duration:'),
+                      SizedBox(width: 16.0),
+                      SizedBox(
+                        width: 70.0,
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setState(() {
+                              _exerciseH = int.tryParse(value) ?? 0;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'H',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 16.0),
+                      SizedBox(
+                        width: 70.0,
+                        child: TextField(
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setState(() {
+                              _exerciseMin = int.tryParse(value) ?? 0;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: 'M',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                    ]
+                  )
                 ],
               ),
 

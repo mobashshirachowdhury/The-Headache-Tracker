@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:fluttertest/pages/daily_form.dart';
 import 'package:fluttertest/pages/calendar.dart';
 import 'package:fluttertest/pages/main_page.dart';
-import 'package:fluttertest/pages/login_page.dart';
-import 'package:fluttertest/components/helptofill.dart';
-import 'package:fluttertest/components/text_field.dart';
-import 'package:fluttertest/databasehandler/databaseconnect.dart';
-import 'package:fluttertest/pages/userprofile_info.dart';
 
+import 'notifications.dart';
+import 'privacy_policy.dart';
+import 'settings.dart';
+import 'userprofile_info.dart';
+
+import 'Trends.dart';
+
+// For testing:
+String userID = "3";
 class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -15,21 +19,24 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
+  DateTime now = DateTime.now();
 
   List pages = [
-    userprofile_info(),
     DailyForm(),
     HeadacheFormMenu(),
-    Calendar()
+    HeadTrackerPage.async(key: ValueKey(DateTime.now()),userID:userID),
+    Trends()
   ];
-  List<Color> colors1 = [Colors.white, Colors.black, Colors.white];
-  List<Color> colors2 = [Colors.lightBlueAccent, Colors.white, Colors.lightBlueAccent];
+  List<Color> colors1 = [Colors.white, Colors.black, Colors.white, Colors.white];
+  List<Color> colors2 = [Colors.lightBlueAccent, Colors.white, Colors.lightBlueAccent, Colors.lightBlueAccent];
 
 
   int currentIndex = 0;
   void OnTap(int index) {
     setState(() {
       currentIndex= index;
+      // So that page 3 can update dynamically
+      now = DateTime.now();
     });
   }
 
@@ -86,21 +93,25 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: currentIndex == 0
           ? SingleChildScrollView(child: pages[currentIndex])
+          : currentIndex == 2
+          ? HeadTrackerPage.async(key: ValueKey(now),userID:userID)
           : pages[currentIndex],
+
+
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         backgroundColor: colors2[currentIndex],
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.check_box_outlined),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.check_box_outlined),
             label: 'Daily Form',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book_outlined),
+            icon: Image.asset(
+              'lib/images/headache.png',
+              height: 40,
+
+            ),
             label: 'Headache',
           ),
           BottomNavigationBarItem(
@@ -108,9 +119,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
             label: 'Calendar',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.auto_graph,
+            ),
+            label: 'Trends',
+          ),
         ],
         selectedItemColor: colors1[currentIndex],
         onTap: OnTap,
+        type: BottomNavigationBarType.fixed,
       ),
 
 

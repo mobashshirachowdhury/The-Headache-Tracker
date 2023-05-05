@@ -48,41 +48,41 @@ class _SymptomFormState extends State<SymptomFormMenu> {
           );
 
           setState(() {
-            // Update the lists
-            _controllers.add(controller);
-            _fields.add(field);
+          // Update the lists
+          _controllers.add(controller);
+          _fields.add(field);
           });
         }
 
       },
-      icon: Icon(
-        Icons.add,
-        size: 25.0,
-      ),
+        icon: Icon(
+          Icons.add,
+          size: 25.0,
+        ),
       color: Colors.grey,
     );
   }
 
   Widget _listView() {
     return Container(
-        padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(
-                Radius.circular(10)
-            ),
-            color: Colors.white
-        ),
-        width: 350,
-        height:420,
-        child:ListView.builder(
-          itemCount: _fields.length,
-          itemBuilder: (context, index) {
-            return Container(
-              margin: EdgeInsets.all(5),
-              child: _fields[index],
-            );
-          },
-        )
+      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(
+              Radius.circular(10)
+          ),
+          color: Colors.white
+      ),
+      width: 350,
+      height:420,
+      child:ListView.builder(
+        itemCount: _fields.length,
+        itemBuilder: (context, index) {
+          return Container(
+            margin: EdgeInsets.all(5),
+            child: _fields[index],
+          );
+        },
+      )
     );
   }
 
@@ -235,6 +235,14 @@ class _SymptomFormState extends State<SymptomFormMenu> {
                                   child: ElevatedButton(
                                       onPressed: () {
                                         // Confirm... Need to pass value back to the headache form
+                                        // 1. Prepare String array to pass back to headache form:
+                                        List<String> result = [];
+                                        for (int i = 0; i < _controllers.length; i++){
+                                          result.add(_controllers[i].text);
+                                        }
+
+                                        // 2. Pass value back
+                                        Navigator.of(context).pop(result);
                                       },
                                       child: Text("Confirm",
                                         style: TextStyle(
@@ -283,3 +291,4 @@ class _SymptomFormState extends State<SymptomFormMenu> {
     );
   }
 }
+

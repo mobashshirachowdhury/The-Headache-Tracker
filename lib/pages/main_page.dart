@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:fluttertest/pages/symptoms_page.dart';
 import 'package:fluttertest/pages/medicine_page.dart';
+
+import 'package:fluttertest/databasehandler/headacheForm.dart';
 
 DateTime now = DateTime.now();
 DateTime todayDate = DateTime(now.year,now.month,now.day);
@@ -13,25 +14,131 @@ class HeadacheFormMenu extends StatefulWidget {
 }
 
 class _HeadacheFormState extends State<HeadacheFormMenu> {
-  // Text field controller:
-
   DateTime _date = todayDate;
   TimeOfDay _TODHeadache = TODNow;
 
   var intensityRange = ['Mild','Moderate','Strong','Intense'];
   var pages = [
     SymptomFormMenu(),
-    MedicineFormMenu()];
+    MedicineFormMenu()
+  ];
+  // 0: Mild, 1: Moderate, 2: Strong, 3: Intense
   int _intensityLevel = 0;
 
-  void _submitHeadacheForm() {
-    // Form submission.
-    // You can access the values of the form inputs using the _sleepQuality,
-    // _hours, _minutes, and _image variables.
+  // Symptom page
+  List<String>? _symptomList;
+
+  // Medicine page
+  String? _medicineName;
+  bool? _ispartial;
+  bool? _isfull;
+  DateTime? _MedicineDate;
+  TimeOfDay? _TODMedicine;
+
+  // For testing
+  String? userid = "3";
+
+  void _submitHeadacheForm() async {
+    // Form submission
+    int dateMS = _date.millisecondsSinceEpoch;
+    int dateInSecondsSinceEpoch = (dateMS / 1000).round();
+
+    int TODMinSinceMidnight = _TODHeadache.hour * 60 + _TODHeadache.minute;
+
+    bool isPartial = _ispartial ?? false;
+    bool isFull = _isfull?? false;
+
+    int Partial = isPartial ? 1 : 0;
+    int Full =  isFull ? 1 : 0;
+
+    // If it would have been null convert to 0 / epoch instead -> signifiying that the value is nulled
+    DateTime medDateTime = _MedicineDate ?? DateTime.fromMillisecondsSinceEpoch(0);
+    int medicineDateMS = medDateTime.millisecondsSinceEpoch;
+
+    // Whether TODMEDMinSinceMidnight is valid depends on medicineDateMS
+    TimeOfDay TODMED =  _TODMedicine ?? TimeOfDay(hour: 0, minute: 0);
+    int TODMEDMinSinceMidnight = TODMED.hour * 60 + TODMED.minute;
+
+    var ms = (new DateTime.now()).millisecondsSinceEpoch;
+    int nowInSecondsSinceEpoch = (ms / 1000).round();
+
+    var today_ts = todayDate.millisecondsSinceEpoch;
+    int TS_DATE = (today_ts / 1000).round();
+
+    // // // For testing
+    // DateTime testDate = DateTime(2023,4,26);
+    // today_ts = testDate.millisecondsSinceEpoch;
+    // TS_DATE = (today_ts / 1000).round();
+
+
+
+    await HeadacheFormDBHelper.instance.add(
+        HeadacheFormInput(
+            userid:userid,
+            TS:nowInSecondsSinceEpoch,
+            TS_DATE: TS_DATE,
+            dateInSecondsSinceEpoch:dateInSecondsSinceEpoch,
+            TODMinSinceMidnight:TODMinSinceMidnight,
+            intensityLevel:_intensityLevel,
+            medicineName:_medicineName,
+            Partial: Partial,
+            Full: Full,
+            medicineDateMS: medicineDateMS,
+            TODMEDMinSinceMidnight: TODMEDMinSinceMidnight)
+    );
+
+    List<dynamic>result = await HeadacheFormDBHelper.instance.fetchTableData();
+    int entryID = result[0]['headacheEntryid'];
+
+    List<String> Symptoms = _symptomList ?? [];
+    if(Symptoms.length > 0){
+      for (int i = 0; i < Symptoms.length ; i++){
+        await SymptomDBHelper.instance.add(
+            HeadacheFormSymptom(
+                headacheEntryid: entryID,
+                TS:nowInSecondsSinceEpoch,
+                symptom:Symptoms[i],
+            )
+        );
+      }
+    }
+
+    // HeadacheFormDBHelper.instance.fetchValidEntriesForUser("2");
+    // HeadacheFormDBHelper.instance.fetchValidEntriesForUser("3");
+    // HeadacheFormDBHelper.instance.fetchLatestHeadacheFormByUserId("3");
+    // Map<String, dynamic>? test= await HeadacheFormDBHelper.instance.fetchLatestHeadacheFormByUserIdAndDate("3", todayDate);
+    // print(test);
+    // HeadacheFormDBHelper.instance.fetchLatestHeadacheFormByUserIdAndDate("3", testDate);
+    // SymptomDBHelper.instance.getEntries(29);
+
+
   }
 
-  void _navigateToNextScreen(BuildContext context,int pageIdx) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) => pages[pageIdx]));
+
+
+
+  void _navigateToNextScreen(BuildContext context,int pageIdx) async {
+    final result = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => pages[pageIdx]));
+
+    if (pageIdx == 0){
+      // Received input from Symptom form:
+      setState(() {
+        _symptomList = result;
+      });
+    }
+    else{
+      // Received input from Headache form:
+      // Output Structure: [_medicine,_ispartial,_isfull,_MedicineDate,_TODMedicine]
+      List<dynamic> resultList = result;
+
+      setState(() {
+        _medicineName = resultList[0];
+        _ispartial = resultList[1];
+        _isfull = resultList[2];
+        _MedicineDate = resultList[3];
+        _TODMedicine = resultList[4];
+      });
+    }
   }
 
   @override
@@ -112,38 +219,38 @@ class _HeadacheFormState extends State<HeadacheFormMenu> {
                             ]
                         ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Container(
-                              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-                              child: Text("${_date.year}/${_date.month}/${_date.day}",
-                                style: TextStyle(
-                                  fontSize: 20.0,
-                                  fontFamily: 'ComicNeue',
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                                child: Text("${_date.year}/${_date.month}/${_date.day}",
+                                  style: TextStyle(
+                                    fontSize: 20.0,
+                                    fontFamily: 'ComicNeue',
+                                  ),
                                 ),
                               ),
-                            ),
 
-                            Container(
-                              padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
-                              child: ElevatedButton(
-                                onPressed: () async{
-                                  DateTime? newDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: _date,
-                                    firstDate: DateTime(2010),  // Is this a reasonable first available year?
-                                    lastDate: todayDate,
-                                  );
+                              Container(
+                                padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
+                                  child: ElevatedButton(
+                                    onPressed: () async{
+                                      DateTime? newDate = await showDatePicker(
+                                        context: context,
+                                        initialDate: _date,
+                                        firstDate: DateTime(2010),  // Is this a reasonable first available year?
+                                        lastDate: todayDate,
+                                      );
 
-                                  // if the function returns null, it means "Cancel" has been pressed
-                                  if (newDate != null){
-                                    setState(() => _date = newDate);
-                                  }
-                                },
-                                child: Text('Select Date'),
-                              ),
-                            ),
-                          ],
+                                      // if the function returns null, it means "Cancel" has been pressed
+                                      if (newDate != null){
+                                        setState(() => _date = newDate);
+                                      }
+                                    },
+                                      child: Text('Select Date'),
+                                  ),
+                                ),
+                            ],
                         ),
                       ]
 
@@ -179,30 +286,30 @@ class _HeadacheFormState extends State<HeadacheFormMenu> {
                             ),
                           ),
                           Container(
-                            child: Text("Period of the day?",
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'ComicNeue',
+                              child: Text("Period of the day?",
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'ComicNeue',
+                                ),
                               ),
                             ),
-                          ),
-                          Container(
-                            child: IconButton(
-                              onPressed: () {
-                                // Reset date
-                                now = DateTime.now();
-                                TODNow = TimeOfDay(hour: now.hour, minute: now.minute);
-                                setState(() => _TODHeadache = TODNow);
-                              },
-                              icon: Icon(
-                                Icons.loop,
-                                size: 25.0,
+                            Container(
+                              child: IconButton(
+                                onPressed: () {
+                                  // Reset date
+                                  now = DateTime.now();
+                                  TODNow = TimeOfDay(hour: now.hour, minute: now.minute);
+                                  setState(() => _TODHeadache = TODNow);
+                                },
+                                icon: Icon(
+                                  Icons.loop,
+                                  size: 25.0,
+                                ),
+                                color: Colors.grey,
                               ),
-                              color: Colors.grey,
                             ),
-                          ),
-                        ],
+                          ],
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -247,15 +354,15 @@ class _HeadacheFormState extends State<HeadacheFormMenu> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Container(
-                    height: 100,
-                    width: 350,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.all(
-                            Radius.circular(10)
-                        ),
-                        color: Colors.white
-                    ),
-                    child: Column(
+                  height: 100,
+                  width: 350,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(
+                          Radius.circular(10)
+                      ),
+                      color: Colors.white
+                  ),
+                  child: Column(
                       children: <Widget>[
                         Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -281,19 +388,19 @@ class _HeadacheFormState extends State<HeadacheFormMenu> {
                                 child: IconButton(
                                   onPressed: () {
                                     showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: Text("Headache Levels"),
-                                          content: Text(
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        title: Text("Headache Levels"),
+                                        content: Text(
                                             "Mild means .. \n\nModerate means .. \n\nStrong means .. \n\nIntense means ..",
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            child: Text("OK"),
+                                            onPressed: () => Navigator.pop(context),
                                           ),
-                                          actions: [
-                                            TextButton(
-                                              child: Text("OK"),
-                                              onPressed: () => Navigator.pop(context),
-                                            ),
-                                          ],
-                                        )
+                                        ],
+                                      )
                                     );
                                   },
                                   icon: Icon(
@@ -306,25 +413,25 @@ class _HeadacheFormState extends State<HeadacheFormMenu> {
                             ]
                         ),
                         Row(
-                            children: <Widget>[
-                              Expanded(
-                                  child:
-                                  Slider(
-                                    value: _intensityLevel.toDouble(),
-                                    max: 3,
-                                    divisions: 4,
-                                    label: intensityRange[_intensityLevel.round()],
-                                    onChanged: (double value) {
-                                      setState(() {
-                                        _intensityLevel = value.toInt();
-                                      });
-                                    },
-                                  )
-                              )
-                            ]
+                          children: <Widget>[
+                            Expanded(
+                              child:
+                                Slider(
+                                  value: _intensityLevel.toDouble(),
+                                  max: 3,
+                                  divisions: 4,
+                                  label: intensityRange[_intensityLevel.round()],
+                                  onChanged: (double value) {
+                                    setState(() {
+                                      _intensityLevel = value.toInt();
+                                    });
+                                  },
+                                )
+                            )
+                          ]
                         ),
                       ],
-                    )
+                  )
 
                 ),
               ]
@@ -455,6 +562,7 @@ class _HeadacheFormState extends State<HeadacheFormMenu> {
                           child: ElevatedButton(
                               onPressed: () {
                                 // Confirm...
+                                _submitHeadacheForm();
                               },
                               child: Text("Confirm",
                                 style: TextStyle(
@@ -474,7 +582,7 @@ class _HeadacheFormState extends State<HeadacheFormMenu> {
                           // padding: EdgeInsets.symmetric(vertical: 0, horizontal: 15),
                           child: ElevatedButton(
                               onPressed: () {
-                                // Confirm...
+                                // Cancel...
                               },
                               child: Text("Cancel",
                                 style: TextStyle(
